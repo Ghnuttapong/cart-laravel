@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Orderdetail;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class OrderdetailController extends Controller
+class HistoryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,20 +17,11 @@ class OrderdetailController extends Controller
     public function index()
     {
         //
-        $count_order = Order::where('user_id', Auth::id())->where('status', 0)->count();
-        if($count_order > 0) {
-            $order = Order::where('user_id', Auth::id())->where('status', 0)->first();
-            $count_orderdetails = Orderdetail::where('order_id', $order->id)->count();
-            if($count_orderdetails > 0) {
-                $data = Orderdetail::all()->where('order_id', $order->id);
-                $orderdetails = array();
-                foreach($data as $item) {
-                    array_push($orderdetails, $item);
-                }
-                return view('orderdetails.index', compact('orderdetails'));
-            }
+        $his_orders = Order::paginate(5)-> where('user_id', Auth::id())->where('status', 3);
+        if(!$his_orders) {
+            return view('historys.index')->with('his_orders', '');
         }
-        return view('orderdetails.index')->with('orderdetails', '');
+        return view('historys.index', compact('his_orders'));
     }
 
     /**
@@ -64,6 +54,8 @@ class OrderdetailController extends Controller
     public function show($id)
     {
         //
+        $orderdetails = Orderdetail::all()->where('order_id', $id);
+        return view('historys.show', compact('orderdetails'));
     }
 
     /**
@@ -87,22 +79,6 @@ class OrderdetailController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $orderdetails = Orderdetail::find($id);
-        $orderdetails->amount -= $request->minus;
-        $orderdetails->save();
-
-        if($orderdetails->amount == 0) {
-            $orderdetails->delete(['id', $orderdetails->id]);
-        }
-
-        $order = Order::find($orderdetails->order_id);
-        $order->total -= $orderdetails->product->price;
-        $order->save();
-        
-        $product = Product::find($orderdetails->product_id);
-        $product->amount += 1;
-        $product->save();
-        return redirect(route('orderdetails.index'));
     }
 
     /**

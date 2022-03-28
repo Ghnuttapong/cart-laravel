@@ -63,6 +63,10 @@ class OrderController extends Controller
             $orderdetail->save();
         }
 
+        $product = Product::find($orderdetail->product_id);
+        $product->amount -= 1;
+        $product->save();
+
         $order->total += $orderdetail->product->price;
         $order->save();
 

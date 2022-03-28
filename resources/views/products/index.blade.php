@@ -16,10 +16,10 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="text-center">
-                                <img src="{{ asset($item->picture) }}" style="object-fit: cover" height="250" width="250"  alt="">
+                                <img src="{{ asset($item->picture) }}" style="object-fit: cover" height="150" width="150"  alt="">
                             </div>
                             <hr class="my-2">
-                            <h3 class="fw-bold">{{ $item->name }}</h3>
+                            <h4 class="fw-bold">{{ $item->name }}</h4>
                             <h4 class="text-success">฿{{ $item->price }}</h4>
                             @if ($item->amount > 0)
                                 <p class="text-muted">สินค้าคงเหลือ {{ $item->amount }} ชิ้น</p>
@@ -28,11 +28,15 @@
                             @endif
                         </div>
                         <div class="card-footer">
+                            @if ($item->amount == 0)
+                                <button type="submit" disabled class="btn btn-secondary w-100">Buy</button>
+                            @else
                             <form action="{{ route('orders.store') }}" method="post">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $item->id }}">
                                 <button type="submit" class="btn btn-secondary w-100">Buy</button>
                             </form>
+                            @endif
                             <form action="{{ route('products.destroy', $item->id) }}" class="w-100 mt-2" method="post">
                                 <a href="{{ route('products.edit', $item->id) }}" class="btn btn-warning">Edit</a>
                                 @csrf
